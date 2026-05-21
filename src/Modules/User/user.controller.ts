@@ -10,7 +10,7 @@ const userSignUp = async (req: Request, res: Response)=>{
     
      const result = await userSignUpIntoDB(req.body)
     response(res, 201,{
-    // statusCode : 201,
+   
     success: true,
     message: "User registered successfully",
     data : result.rows[0]

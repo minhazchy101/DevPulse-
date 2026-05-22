@@ -3,7 +3,7 @@ import { response } from "../../utilities/sendRes";
 import { issuesService } from "./Issues.service";
 
 const {
-    createIssueIntoDB, getAllIssuesIntoDB
+    createIssueIntoDB, getAllIssuesIntoDB, getSingleIssueIntoDB
 }= issuesService
 
 const createIssue =async (req: Request, res: Response)=>{
@@ -42,7 +42,27 @@ const getAllIssues = async (req: Request, res: Response)=>{
         }
 }
 
+const getSingleIssue =async (req: Request, res: Response)=>{
+try {
+    const {id} = req.params
+      const result = await getSingleIssueIntoDB(id as string);
+       
+      response(res, 200,{
+         success: true,
+         data: result
+      })
+    } 
+catch (error: any) {
+           response(res,400,{   
+        success: false,
+        message: error.message,
+        error
+           }) 
+        }
+}
+
 export const issuesController ={
     createIssue,
-    getAllIssues
+    getAllIssues,
+    getSingleIssue,
 }

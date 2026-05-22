@@ -1,5 +1,5 @@
 import { pool } from "../../db"
-import type { QueryParams } from "../../types/queries";
+import { allowedQuery, type QueryParams } from "../../types/queries";
 import type { IIssue } from "./Issues.interface";
 
 const createIssueIntoDB =async(payload: IIssue)=>{
@@ -22,13 +22,14 @@ const createIssueIntoDB =async(payload: IIssue)=>{
     return result;
 }
 
-const getAllIssuesIntoDB = async (queries: any) => {
+const getAllIssuesIntoDB = async (queries: QueryParams) => {
 
   
   let query = `SELECT * FROM issues`;
   const values: string[] = [];
   const conditions: string[] = [];
 
+ 
   // filters
   if (queries.type) {
     values.push(queries.type);
@@ -89,24 +90,66 @@ const getAllIssuesIntoDB = async (queries: any) => {
     reporterMap.set(reporter.id, reporter);
   });
 
-  // attach reporter data
-  const issuesData = issues.map((issue) => ({
-    id: issue.id,
-    title: issue.title,
-    description: issue.description,
-    type: issue.type,
-    status: issue.status,
 
-    reporter: reporterMap.get(issue.reporter_id),
+ const issuesData = issues.map((issue) => {
 
-    created_at: issue.created_at,
-    updated_at: issue.updated_at,
-  }));
+  const {
+    reporter_id,
+    created_at,
+    updated_at,
+    ...rest
+  } = issue;
+
+  return {
+    ...rest,
+    reporter: reporterMap.get(reporter_id),
+    created_at,
+    updated_at,
+  };
+});
 
   return issuesData;
 };
 
+const getSingleIssueIntoDB = async (id : string) =>{
+  const result = await pool.query(`
+     SELECT * FROM issues
+     WHERE id = $1
+      `, [id]);
+        const issue = result.rows[0];
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+      
+      const reporterIds = issue.reporter_id;
+
+     const reporterData = await pool.query(
+    `
+    SELECT id, name, role
+    FROM users
+    WHERE id = $1
+    `,
+    [reporterIds]
+  );
+
+  const reporter = reporterData.rows[0];
+  delete issue.reporter_id
+  issue.reporter = reporter;
+  const {
+  created_at,
+  updated_at,
+  ...rest
+} = issue;
+
+return {
+  ...rest,
+  created_at,
+  updated_at,
+};
+}
+
 export const issuesService ={
     createIssueIntoDB,
-    getAllIssuesIntoDB
+    getAllIssuesIntoDB,
+    getSingleIssueIntoDB,
 }

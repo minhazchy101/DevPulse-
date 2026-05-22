@@ -23,30 +23,28 @@ const createIssueIntoDB =async(payload: IIssue)=>{
 }
 
 const getAllIssuesIntoDB = async (queries: any) => {
+
+  
   let query = `SELECT * FROM issues`;
   const values: string[] = [];
-
-  // FILTERS
   const conditions: string[] = [];
 
-  // type filter
+  // filters
   if (queries.type) {
     values.push(queries.type);
     conditions.push(`type = $${values.length}`);
   }
 
-  // status filter
   if (queries.status) {
     values.push(queries.status);
     conditions.push(`status = $${values.length}`);
   }
 
-  // add WHERE if conditions exist
   if (conditions.length > 0) {
     query += ` WHERE ` + conditions.join(" AND ");
   }
 
-  // SORTING
+  // sorting
   let sortOrder = "DESC";
 
   if (queries.sort === "oldest") {
@@ -55,9 +53,57 @@ const getAllIssuesIntoDB = async (queries: any) => {
 
   query += ` ORDER BY created_at ${sortOrder}`;
 
-  const result = await pool.query(query, values);
 
-  return result;
+  const issuesResult = await pool.query(query, values);
+
+  const issues = issuesResult.rows;
+
+  
+  const reporterIds = [
+    ...new Set(
+      issues.map((issue) => issue.reporter_id)
+    ),
+  ];
+
+ 
+  if (reporterIds.length === 0) {
+    return issues;
+  }
+
+  // fetch reporters
+  const reportersResult = await pool.query(
+    `
+    SELECT id, name, role
+    FROM users
+    WHERE id = ANY($1)
+    `,
+    [reporterIds]
+  );
+
+  const reporters = reportersResult.rows;
+
+ 
+  const reporterMap = new Map();
+
+  reporters.forEach((reporter) => {
+    reporterMap.set(reporter.id, reporter);
+  });
+
+  // attach reporter data
+  const issuesData = issues.map((issue) => ({
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+
+    reporter: reporterMap.get(issue.reporter_id),
+
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  }));
+
+  return issuesData;
 };
 
 export const issuesService ={

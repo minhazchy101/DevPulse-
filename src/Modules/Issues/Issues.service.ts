@@ -1,5 +1,5 @@
 import { pool } from "../../db"
-import { allowedQuery, type QueryParams } from "../../types/queries";
+import { allowedQuery, validate, type QueryParams } from "../../types/queries";
 import type { IIssue } from "./Issues.interface";
 
 const createIssueIntoDB =async(payload: IIssue)=>{
@@ -24,6 +24,9 @@ const createIssueIntoDB =async(payload: IIssue)=>{
 
 const getAllIssuesIntoDB = async (queries: QueryParams) => {
 
+   validate("type", queries.type);
+   validate("status", queries.status);
+   validate("sort", queries.sort);
   
   let query = `SELECT * FROM issues`;
   const values: string[] = [];

@@ -22,12 +22,43 @@ const createIssueIntoDB =async(payload: IIssue)=>{
     return result;
 }
 
-const getAllIssuesIntoDB = async(queries: QueryParams)=>{
-  const result = await pool.query(`
-     SELECT * FROM issues
-    `)
-    return result;
-}
+const getAllIssuesIntoDB = async (queries: any) => {
+  let query = `SELECT * FROM issues`;
+  const values: string[] = [];
+
+  // FILTERS
+  const conditions: string[] = [];
+
+  // type filter
+  if (queries.type) {
+    values.push(queries.type);
+    conditions.push(`type = $${values.length}`);
+  }
+
+  // status filter
+  if (queries.status) {
+    values.push(queries.status);
+    conditions.push(`status = $${values.length}`);
+  }
+
+  // add WHERE if conditions exist
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join(" AND ");
+  }
+
+  // SORTING
+  let sortOrder = "DESC";
+
+  if (queries.sort === "oldest") {
+    sortOrder = "ASC";
+  }
+
+  query += ` ORDER BY created_at ${sortOrder}`;
+
+  const result = await pool.query(query, values);
+
+  return result;
+};
 
 export const issuesService ={
     createIssueIntoDB,

@@ -62,7 +62,13 @@ const deleteIssue =async (req: Request, res: Response)=>{
 try {
     const {id} = req.params
       const result = await deleteIssueIntoDB(id as string);
-       
+       if(result.rows.length===0){
+         response(res, 404,{
+         success: false,
+         message : "Issue not found"
+      })
+      return;
+       }
       response(res, 200,{
          success: true,
          message : "Issue deleted successfully"

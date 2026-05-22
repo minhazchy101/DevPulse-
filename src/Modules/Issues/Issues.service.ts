@@ -1,4 +1,5 @@
 import { pool } from "../../db"
+import type { QueryParams } from "../../types/queries";
 import type { IIssue } from "./Issues.interface";
 
 const createIssueIntoDB =async(payload: IIssue)=>{
@@ -21,6 +22,14 @@ const createIssueIntoDB =async(payload: IIssue)=>{
     return result;
 }
 
+const getAllIssuesIntoDB = async(queries: QueryParams)=>{
+  const result = await pool.query(`
+     SELECT * FROM issues
+    `)
+    return result;
+}
+
 export const issuesService ={
-    createIssueIntoDB
+    createIssueIntoDB,
+    getAllIssuesIntoDB
 }

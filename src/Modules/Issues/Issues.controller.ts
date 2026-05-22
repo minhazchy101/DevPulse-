@@ -3,15 +3,12 @@ import { response } from "../../utilities/sendRes";
 import { issuesService } from "./Issues.service";
 
 const {
-    createIssueIntoDB
+    createIssueIntoDB, getAllIssuesIntoDB
 }= issuesService
 
 const createIssue =async (req: Request, res: Response)=>{
         try{
-           const issueData = {
-      ...req.body
-    };
-            const result = await createIssueIntoDB(issueData)
+            const result = await createIssueIntoDB(req.body)
              response(res, 201,{
                 success: true,
                 message:  "Issue created successfully",
@@ -27,6 +24,25 @@ const createIssue =async (req: Request, res: Response)=>{
         }
 }
 
+const getAllIssues = async (req: Request, res: Response)=>{
+    try {
+         const queries = req.query;
+      const result = await getAllIssuesIntoDB(queries);
+        // console.log("getAllIssues result: ", result)
+      response(res, 200,{
+         success: true,
+         data: result
+      })
+    } catch (error: any) {
+           response(res,400,{   
+        success: false,
+        message: error.message,
+        error
+           }) 
+        }
+}
+
 export const issuesController ={
-    createIssue
+    createIssue,
+    getAllIssues
 }

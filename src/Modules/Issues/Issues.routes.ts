@@ -5,8 +5,10 @@ import { USER_ROLES } from "../../types/roles";
 
 const router = Router();
 
-const {createIssue} = issuesController;
+const {createIssue, getAllIssues} = issuesController;
 
 router.post('/', auth(USER_ROLES.contributor, USER_ROLES.maintainer), createIssue)
+
+router.get('/', getAllIssues)
 
 export const issuesRoutes = router

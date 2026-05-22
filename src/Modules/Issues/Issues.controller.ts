@@ -3,7 +3,7 @@ import { response } from "../../utilities/sendRes";
 import { issuesService } from "./Issues.service";
 
 const {
-    createIssueIntoDB, getAllIssuesIntoDB, getSingleIssueIntoDB
+    createIssueIntoDB, getAllIssuesIntoDB, getSingleIssueIntoDB, deleteIssueIntoDB
 }= issuesService
 
 const createIssue =async (req: Request, res: Response)=>{
@@ -34,10 +34,9 @@ const getAllIssues = async (req: Request, res: Response)=>{
          data: result
       })
     } catch (error: any) {
-           response(res,400,{   
+           response(res,404,{   
         success: false,
         message: error.message,
-        error
            }) 
         }
 }
@@ -53,10 +52,26 @@ try {
       })
     } 
 catch (error: any) {
-           response(res,400,{   
+           response(res,404,{   
         success: false,
         message: error.message,
-        error
+           }) 
+        }
+}
+const deleteIssue =async (req: Request, res: Response)=>{
+try {
+    const {id} = req.params
+      const result = await deleteIssueIntoDB(id as string);
+       
+      response(res, 200,{
+         success: true,
+         message : "Issue deleted successfully"
+      })
+    } 
+catch (error: any) {
+           response(res,404,{   
+        success: false,
+        message: error.message,
            }) 
         }
 }
@@ -65,4 +80,5 @@ export const issuesController ={
     createIssue,
     getAllIssues,
     getSingleIssue,
+    deleteIssue
 }

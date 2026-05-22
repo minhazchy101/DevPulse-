@@ -3,7 +3,11 @@ import { response } from "../../utilities/sendRes";
 import { issuesService } from "./Issues.service";
 
 const {
-    createIssueIntoDB, getAllIssuesIntoDB, getSingleIssueIntoDB, deleteIssueIntoDB
+    createIssueIntoDB,
+     getAllIssuesIntoDB, 
+     getSingleIssueIntoDB,
+     updateIssueIntoDB,
+      deleteIssueIntoDB,
 }= issuesService
 
 const createIssue =async (req: Request, res: Response)=>{
@@ -15,11 +19,11 @@ const createIssue =async (req: Request, res: Response)=>{
                 data : result.rows[0]
                 })
         }
-    catch (error: any) {
+    catch (errors: any) {
            response(res,400,{   
         success: false,
-        message: error.message,
-        error
+        message: errors.message,
+        errors
            }) 
         }
 }
@@ -33,10 +37,11 @@ const getAllIssues = async (req: Request, res: Response)=>{
          success: true,
          data: result
       })
-    } catch (error: any) {
+    } catch (errors: any) {
            response(res,404,{   
         success: false,
-        message: error.message,
+        message: errors.message,
+        errors
            }) 
         }
 }
@@ -51,13 +56,41 @@ try {
          data: result
       })
     } 
-catch (error: any) {
+catch (errors: any) {
            response(res,404,{   
         success: false,
-        message: error.message,
+        message: errors.message,
+        errors
            }) 
         }
 }
+const updateIssue =async (req: Request, res: Response)=>{
+try {
+    const {id} = req.params
+      const result = await updateIssueIntoDB(req.body, id as string);
+       if(result.rows.length===0){
+         response(res, 404,{
+         success: false,
+         message : "Issue not found",
+         errors: {}
+      })
+      return;
+       }
+      response(res, 200,{
+         success: true,
+         data: result.rows[0]
+      })
+    } 
+catch (errors: any) {
+           response(res,404,{   
+        success: false,
+        message: errors.message,
+        errors
+           }) 
+        }
+}
+
+
 const deleteIssue =async (req: Request, res: Response)=>{
 try {
     const {id} = req.params
@@ -65,7 +98,8 @@ try {
        if(result.rows.length===0){
          response(res, 404,{
          success: false,
-         message : "Issue not found"
+         message : "Issue not found",
+         errors: {}
       })
       return;
        }
@@ -74,17 +108,21 @@ try {
          message : "Issue deleted successfully"
       })
     } 
-catch (error: any) {
+catch (errors: any) {
            response(res,404,{   
         success: false,
-        message: error.message,
+        message: errors.message,
+       errors
            }) 
         }
 }
+
+
 
 export const issuesController ={
     createIssue,
     getAllIssues,
     getSingleIssue,
-    deleteIssue
+    deleteIssue,
+    updateIssue
 }

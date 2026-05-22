@@ -15,11 +15,11 @@ const userSignUp = async (req: Request, res: Response)=>{
     message: "User registered successfully",
     data : result.rows[0]
     })
-    } catch (error: any) {
+    } catch (errors: any) {
        response(res,400,{   
     success: false,
-    message: error.message,
-    error
+    message: errors.message,
+    errors
        }) 
     }
    
@@ -33,12 +33,12 @@ const userLogin =async (req: Request, res: Response)=>{
     message: "Login successful",
     data : result
     })
-    } catch (error: any) {
+    } catch (errors: any) {
        response(res,400,{
    
     success: false,
-    message: error.message,
-    error
+    message: errors.message,
+    errors
        }) 
     }
 }

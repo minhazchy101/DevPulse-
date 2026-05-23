@@ -3,6 +3,7 @@ import { userRoutes } from './Modules/User/user.routes';
 import { issuesRoutes } from './Modules/Issues/Issues.routes';
 import cors from 'cors'
 import config from './config';
+import { globalErrorHandler } from './middleware/globalError';
 
 const app: Application = express()
 // export const port = config.port;
@@ -26,6 +27,7 @@ app.use(
 app.use(express.json());
 app.use("/api/auth", userRoutes)
 app.use("/api/issues", issuesRoutes)
+app.use(globalErrorHandler);
 
 app.get('/', (req, res) => {
   res.send('DevPulse Server')

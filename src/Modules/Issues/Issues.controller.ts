@@ -67,7 +67,9 @@ catch (errors: any) {
 const updateIssue =async (req: Request, res: Response)=>{
 try {
     const {id} = req.params
-      const result = await updateIssueIntoDB(req.body, id as string);
+   //  console.log(req.body.role)
+   const user = req.body.user;
+      const result = await updateIssueIntoDB(req.body, id as string, user);
        if(result.rows.length===0){
          response(res, 404,{
          success: false,
@@ -93,8 +95,11 @@ catch (errors: any) {
 
 const deleteIssue =async (req: Request, res: Response)=>{
 try {
-    const {id} = req.params
-      const result = await deleteIssueIntoDB(id as string);
+   
+   const {id} = req.params
+   const result = await deleteIssueIntoDB(id as string);
+
+
        if(result.rows.length===0){
          response(res, 404,{
          success: false,

@@ -1,9 +1,9 @@
 import { pool } from "../../db"
 import { allowedQuery, validate, type QueryParams } from "../../types/queries";
+import { USER_ROLES } from "../../types/roles";
 import type { IIssue } from "./Issues.interface";
 
 const createIssueIntoDB =async(payload: IIssue)=>{
-        // console.log(payload)
         const {title, description, type, reporter_id} = payload;
 
         const result = await pool.query(
@@ -151,16 +151,43 @@ return {
 };
 }
 
-const updateIssueIntoDB = async (payload : IIssue, id : string)=>{
-  const { title, description, type} = payload;
+const updateIssueIntoDB = async (payload : IIssue, id : string,  user: any)=>{
+  
+  const issueResult = await pool.query(
+    `SELECT * FROM issues WHERE id = $1`,
+    [id]
+  );
+
+   const issue = issueResult.rows[0];
+
+  if (issueResult.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
+
+   if (user.role !== USER_ROLES.maintainer) {
+
+    // own issue
+    if (issue.reporter_id !== user.id) {
+      throw new Error("Forbidden");
+    }
+
+    // open issue
+    if (issue.status !== "open") {
+      throw new Error("Cannot update closed issue");
+    }
+  }
+
+  const { title, description, type, status} = payload;
+  
      const result = await pool.query(`
      UPDATE issues 
      SET title=COALESCE($1,title),
          description=COALESCE($2,description),
-         type=COALESCE($3,type)
-     WHERE id=$4
+         type=COALESCE($3,type),
+         status=COALESCE($4,status)
+     WHERE id=$5
      RETURNING *
-      `,[ title, description, type, id]);
+      `,[ title, description, type,status, id]);
          return result;
 }
 

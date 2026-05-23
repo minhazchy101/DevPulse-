@@ -16,6 +16,7 @@ export const auth =(...roles: UserRoles[])=>{
                success: false,
                message: "Unauthorized access."
             })
+             return;
             }
 
              const decoded = jwt.verify(
@@ -35,6 +36,7 @@ export const auth =(...roles: UserRoles[])=>{
          success: false,
       message: "User Not Found decoded.!"
     })
+     return;
             }
         
             if(roles.length && !roles.includes(user.role)){
@@ -42,9 +44,12 @@ export const auth =(...roles: UserRoles[])=>{
                     success: false,
                    message: "Access denied"
                 })
+                return;
             }
+          
            req.body = req.body || {};
            req.body.reporter_id = decoded.id;
+           req.body.user = decoded;
          
             next();
     
